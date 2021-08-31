@@ -8,6 +8,7 @@ class Strings implements StringsInterface
     {
         return lcfirst(str_replace('_', '', ucwords($input, '_')));
     }
+    
     public function mirrorMultibyteString(string $input): string
     {
         $arr = explode(' ', $input);
@@ -18,8 +19,10 @@ class Strings implements StringsInterface
             }
             $arr[$key] = $strcyr;
         }
+        
         return implode(" ", $arr);
     }
+    
     public function getBrandName(string $noun): string
     {
         $first = mb_substr($noun, 0, 1, "UTF-8");
@@ -27,9 +30,11 @@ class Strings implements StringsInterface
 
         if ($first != $last) {
             $noun = ucfirst($noun);
+            
             return "The $noun";
         } else {
-            return ucfirst($noun.ltrim($noun, $noun[0]));
+            
+            return ucfirst($noun . ltrim($noun, $noun[0]));
         }
     }
 }
