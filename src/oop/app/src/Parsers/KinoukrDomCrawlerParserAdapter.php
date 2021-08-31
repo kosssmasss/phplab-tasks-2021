@@ -13,6 +13,7 @@ class KinoukrDomCrawlerParserAdapter implements ParserInterface
         $description = $crawler->filter('#dle-content > div > article > div.fpage > div.fdesc.full-text.noselect.clearfix')->text();
 
         $arr = ['title' => $title, 'poster'=> $poster, 'description' => $description];
+        
         return $arr;
     }
 }

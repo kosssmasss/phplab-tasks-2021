@@ -9,6 +9,7 @@ class GuzzleAdapter implements TransportInterface
         $client = new \GuzzleHttp\Client();
         $res = $client->request('GET', $url);
         $body = $res->getBody();
+        
         return $body;
     }
 }

@@ -12,6 +12,7 @@ class CurlStrategy implements TransportInterface
         $body = curl_exec($ch);
         //var_dump(curl_getinfo($ch, CURLINFO_HEADER_OUT));
         curl_close($ch);
+        
         return $body;
     }
 }

@@ -22,6 +22,7 @@ class FilmixParserStrategy implements ParserInterface
 
 
         $arr = ['title' => $title, 'poster'=> $poster, 'description' => $description];
+        
         return $arr;
     }
 }
