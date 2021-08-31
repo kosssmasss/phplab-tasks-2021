@@ -27,6 +27,7 @@ class Basics extends BasicsValidator implements BasicsInterface
         if (($year % 4 == 0 && $year % 100 != 0) || $year % 400 == 0) {
             return true;
         }
+        
         return false;
     }
 
@@ -35,15 +36,16 @@ class Basics extends BasicsValidator implements BasicsInterface
         $this->isValidStringException($input);
         $left = 0;
         $right = 0;
-        for ($i = 0;$i < (strlen($input) / 2);$i++) {
+        for ($i = 0; $i < (strlen($input) / 2); $i++) {
             $left += $input[$i];
         }
-        for ($i = (strlen($input) / 2);$i < strlen($input);$i++) {
+        for ($i = (strlen($input) / 2); $i < strlen($input); $i++) {
             $right += $input[$i];
         }
         if ($left == $right) {
             return true;
         }
+        
         return false;
     }
 }
