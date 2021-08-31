@@ -19,22 +19,32 @@ class Arrays implements ArraysInterface
 
     public function getUniqueValue(array $input): int
     {
-        $uniq = [];
-        foreach ($input as $item) {
-            $count = 0;
-            foreach ($input as $itm) {
-                if ($item == $itm) {
-                    $count++;
-                }
-            }
-            if ($count == 1) {
-                $uniq[] = $item;
-            }
-        }
-        if (count($uniq) > 0) {
-            return min($uniq);
-        }
+        $uniq_val = array_count_values($input);
+        $unik_key = array_filter($uniq_val, function($k) {
+            return ($k == 1);
+        });
+        $arr_keys = array_keys($unik_key);
+        $min = min($arr_keys);
+        if ($min > 0) return $min;
+
         return 0;
+            
+        // $uniq = [];
+        // foreach ($input as $item) {
+        //     $count = 0;
+        //     foreach ($input as $itm) {
+        //         if ($item == $itm) {
+        //             $count++;
+        //         }
+        //     }
+        //     if ($count == 1) {
+        //         $uniq[] = $item;
+        //     }
+        // }
+        // if (count($uniq) > 0) {
+        //     return min($uniq);
+        // }
+        // return 0;
     }
 
     public function groupByTag(array $input): array
@@ -58,6 +68,7 @@ class Arrays implements ArraysInterface
             sort($names);
             $result[$uniq] = $names;
         }
+
         return $result;
     }
 }
