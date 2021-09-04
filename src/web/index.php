@@ -31,8 +31,6 @@ if ($_GET['filter_by_first_letter']){
     });
 }
 
-
-
 if ($_GET['sort']){
     $keys = array_column($airports, $_GET['sort']);
     array_multisort($keys, SORT_ASC, $airports);
