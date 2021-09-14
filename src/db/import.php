@@ -62,8 +62,7 @@ foreach (require_once('../web/airports.php') as $item) {
             'timezone' => $item['timezone'],
 
         ]);
-        //$airportId = $pdo->lastInsertId();
     } else {
-        //$airportId = $airport['id'];
+        echo "Something went wrong...";
     }
 }
