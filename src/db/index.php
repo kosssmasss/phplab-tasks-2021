@@ -2,14 +2,15 @@
 /**
  * Connect to DB
  */
-
+require_once './pdo_ini.php';
 /**
  * SELECT the list of unique first letters using https://www.w3resource.com/mysql/string-functions/mysql-left-function.php
  * and https://www.w3resource.com/sql/select-statement/queries-with-distinct.php
  * and set the result to $uniqueFirstLetters variable
  */
-$uniqueFirstLetters = ['A', 'B', 'C'];
-
+//$uniqueFirstLetters = ['A', 'B', 'C'];
+$sth = $pdo->query('SELECT distinct LEFT(name, 1) FROM hometask.airports order by 1; ');
+$uniqueFirstLetters = $sth->fetchAll(PDO::FETCH_COLUMN);
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
@@ -47,7 +48,47 @@ $uniqueFirstLetters = ['A', 'B', 'C'];
  *
  * For city_name and state_name fields you can use alias https://www.mysqltutorial.org/mysql-alias/
  */
-$airports = [];
+//$airports = [];
+
+$query = 'select a.name, a.code, c.name as city, s.name as state, a.address, a.timezone from airports a join cities c on a.city_id = c.id join states s on a.state_id = s.id  ';
+if ($_GET['filter_by_first_letter']){
+    $letter = $_GET['filter_by_first_letter'];
+    $query .= 'where a.name like "'.$letter.'%" ';
+    $countQuery = 'select count(*) from airports where name like "'.$letter.'%";';
+}
+else {
+    $countQuery = 'select count(*) from airports;';
+}
+
+$sthc = $pdo->query($countQuery);
+$total = $sthc->fetch(PDO::FETCH_COLUMN);
+
+if ($_GET['sort']){
+    $name = $_GET['sort'];
+    $query .= ' order by '.$name;
+}
+
+$page = ! empty( $_GET['page'] ) ? (int) $_GET['page'] : 1;
+if ($_GET['letter'] != $_GET['filter_by_first_letter']){
+    $page = 1;
+    $_GET['letter'] = $_GET['filter_by_first_letter'];
+}
+
+//Store letter for the next changes
+if (empty($_GET['letter'])){
+    $_GET['letter'] = $_GET['filter_by_first_letter'];
+}
+
+$limit = 20; 
+$totalPages = ceil( $total/ $limit );
+$page = max($page, 1); 
+$page = min($page, $totalPages); 
+$offset = ($page - 1) * $limit;
+$query .= ' LIMIT '.$offset.',20 ';
+$query .= ';';
+$sth = $pdo->prepare($query);
+$sth->execute();
+$airports = $sth->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="en">
@@ -78,7 +119,7 @@ $airports = [];
         Filter by first letter:
 
         <?php foreach ($uniqueFirstLetters as $letter): ?>
-            <a href="#"><?= $letter ?></a>
+            <a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'filter_by_first_letter' => $letter ) ) ) ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
         <a href="/" class="float-right">Reset all filters</a>
@@ -97,10 +138,10 @@ $airports = [];
     <table class="table">
         <thead>
         <tr>
-            <th scope="col"><a href="#">Name</a></th>
-            <th scope="col"><a href="#">Code</a></th>
-            <th scope="col"><a href="#">State</a></th>
-            <th scope="col"><a href="#">City</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'name' ) ) ) ?>">Name</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'code' ) ) ) ?>">Code</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'state' ) ) ) ?>">State</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'city' ) ) ) ?>">City</a></th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -116,12 +157,12 @@ $airports = [];
              - when you apply filter_by_state, than filter_by_first_letter (see Filtering task #1) is not reset
                i.e. if you have filter_by_first_letter set you can additionally use filter_by_state
         -->
-        <?php foreach ($airports as $airport): ?>
+        <?php foreach ($airports as $airport): ?> 
         <tr>
             <td><?= $airport['name'] ?></td>
             <td><?= $airport['code'] ?></td>
-            <td><a href="#"><?= $airport['state_name'] ?></a></td>
-            <td><?= $airport['city_name'] ?></td>
+            <td><a href="#"><?= $airport['state'] ?></a></td>
+            <td><?= $airport['city'] ?></td>
             <td><?= $airport['address'] ?></td>
             <td><?= $airport['timezone'] ?></td>
         </tr>
@@ -140,9 +181,9 @@ $airports = [];
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <?php for($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>"><a class="page-link" href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'page' => $i ) ) ) ?>"><?= $i ?></a></li>
+            <?php endfor; ?>
         </ul>
     </nav>
 
