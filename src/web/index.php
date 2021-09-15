@@ -23,6 +23,43 @@ $airports = require './airports.php';
  * and apply pagination logic
  * (see Pagination task below)
  */
+
+if ($_GET['filter_by_first_letter']){
+    $airports = array_filter($airports, function($airport)
+    {
+      return substr($airport['name'], 0, 1) == $_GET['filter_by_first_letter'];
+    });
+}
+
+if ($_GET['sort']){
+    $keys = array_column($airports, $_GET['sort']);
+    array_multisort($keys, SORT_ASC, $airports);
+}
+
+$page = ! empty( $_GET['page'] ) ? (int) $_GET['page'] : 1;
+$total = count( $airports ); 
+$limit = 20; 
+$totalPages = ceil( $total/ $limit ); 
+$page = max($page, 1); 
+$page = min($page, $totalPages); 
+$offset = ($page - 1) * $limit;
+if( $offset < 0 ) $offset = 0;
+
+$airports = array_slice( $airports, $offset, $limit );
+
+//if letter changes we set page to 1
+//if ($_GET['letter'] != $_GET['filter_by_first_letter'] || !isset($_GET['letter']) || empty($_GET['letter'])){
+if ($_GET['letter'] != $_GET['filter_by_first_letter']){
+    $page = 1;
+    $_GET['letter'] = $_GET['filter_by_first_letter'];
+}
+//Store letter for the next changes
+if (empty($_GET['letter'])){
+    $_GET['letter'] = $_GET['filter_by_first_letter'];
+}
+
+$_GET['page'] = $page;
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,7 +90,7 @@ $airports = require './airports.php';
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="#"><?= $letter ?></a>
+            <a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'filter_by_first_letter' => $letter ) ) ) ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
         <a href="/" class="float-right">Reset all filters</a>
@@ -72,10 +109,10 @@ $airports = require './airports.php';
     <table class="table">
         <thead>
         <tr>
-            <th scope="col"><a href="#">Name</a></th>
-            <th scope="col"><a href="#">Code</a></th>
-            <th scope="col"><a href="#">State</a></th>
-            <th scope="col"><a href="#">City</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'name' ) ) ) ?>">Name</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'code' ) ) ) ?>">Code</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'state' ) ) ) ?>">State</a></th>
+            <th scope="col"><a href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'sort' => 'city' ) ) ) ?>">City</a></th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -103,7 +140,12 @@ $airports = require './airports.php';
         <?php endforeach; ?>
         </tbody>
     </table>
+<?php
+// echo '<pre>';
+// print_r($_GET);
 
+// echo $page;
+?>
     <!--
         Pagination task
         Replace HTML below so that it shows real pages dependently on number of airports after all filters applied
@@ -115,9 +157,12 @@ $airports = require './airports.php';
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <?php for($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>"><a class="page-link" href="<?=  '?'.http_build_query( array_merge( $_GET, array( 'page' => $i ) ) ) ?>"><?= $i ?></a></li>
+            <?php endfor; ?>
+            <!-- <li class="page-item active"><a class="page-link" href="#">1</a></li>
             <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li> -->
         </ul>
     </nav>
 

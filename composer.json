@@ -8,7 +8,8 @@
             "basics\\": "src/basics",
             "strings\\": "src/strings",
             "arrays\\": "src/arrays",
-            "functions\\": "src/functions"
+            "functions\\": "src/functions",
+            "web\\": "src/web"
         }
     },
     "require": {
